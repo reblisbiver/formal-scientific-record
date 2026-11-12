@@ -1,0 +1,39 @@
+\documentclass[11pt]{article}
+\usepackage{../fsr}
+\begin{document}
+\fsrtitle{Accuracy Conditional on Choice Transitions}{Descriptive analysis \textnormal{\textemdash} synthetic demonstration}
+
+\section{Grouping and estimand}
+For trials with an observed previous choice, let $y_t$ be the realized absolute choice and $\widehat y_t$ its prediction. The analysis unit is a trial, not a participant:
+\begin{equation}
+G_t=\begin{cases}\mathrm{Stay},&y_t=y_{t-1},\\\mathrm{Switch},&y_t\ne y_{t-1},\end{cases}\qquad
+\widehat p_g=\frac{c_g}{n_g},\quad c_g=\sum_{t:G_t=g}\mathbf1\{\widehat y_t=y_t\},\quad n_g=\sum_t\mathbf1\{G_t=g\}.
+\end{equation}
+The first trial of each sequence is excluded because its preceding choice is unavailable. For each group, $n_g$ is the number of eligible trials and $c_g$ the number of correct predictions.
+
+\section{Group-conditional observations}
+\begin{center}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrr@{}}
+\toprule
+Group & Trials $n_g$ & Correct $c_g$ & Accuracy & Wilson 95\% interval\\
+\midrule
+Stay & 8,000 & 6,880 & 86.00\% & [85.22, 86.74]\%\\
+Switch & 2,000 & 1,100 & 55.00\% & [52.81, 57.17]\%\\
+All eligible trials & 10,000 & 7,980 & 79.80\% & \textemdash\\
+\bottomrule
+\end{tabular*}
+\end{center}
+\begin{figure}[h!]
+\centering\includegraphics[width=.88\linewidth]{../figures/C_stage_profile.pdf}
+\caption{Conditional accuracy in early, middle and late trial stages. Error bars are Wilson binomial reference intervals, computed at trial level. All records are synthetic.}
+\end{figure}
+
+\section{Interval definition and scope}
+For group count $(c,n)$, $\widehat p=c/n$ and $z=1.96$, the displayed interval is
+\begin{equation}
+\mathrm{Wilson}_{.95}(c,n)=\frac{\widehat p+z^2/(2n)\ \pm\ z\sqrt{\widehat p(1-\widehat p)/n+z^2/(4n^2)}}{1+z^2/n}.
+\end{equation}
+This interval assumes independent Bernoulli trials. It does \emph{not} account for within-participant dependence; participant identifiers, participant-level uncertainty and hypothesis-test results are absent. It must not be interpreted as participant-level inference.
+
+\fsrsource{\textbf{Reproducibility.} Synthetic counts: \texttt{data/C\_condition\_stage.csv}; design: \texttt{data/C\_design\_results.json}. Overall counts equal the sums of stage-specific counts; no causal or aleatoric-uncertainty claim is made.}
+\end{document}

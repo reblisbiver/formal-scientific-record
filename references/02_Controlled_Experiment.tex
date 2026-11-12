@@ -1,0 +1,49 @@
+\documentclass[11pt]{article}
+\usepackage{../fsr}
+\begin{document}
+\fsrtitle{Absolute vs. Stay/Switch Target Encoding}{Controlled comparison \textnormal{\textemdash} synthetic demonstration}
+
+\section{Question and controlled design}
+With the same input, recurrent architecture, training protocol, test examples and evaluation space, compare two target encodings. The only designated change is the learning target.
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}p{.19\linewidth}LL@{}}
+\toprule
+ & Baseline $B$ & Treatment $T$\\
+\midrule
+Input & RAW3 & RAW3\\
+Architecture & GRU & GRU\\
+Training target & $y_t\in\{0,1\}$ & $z_t=\mathbf1\{y_t\ne y_{t-1}\}$\\
+Evaluation target & $y_t$ & $y_t$ (inverse-mapped)\\
+Protocol & \multicolumn{2}{l}{Paired seeds ($n=8$); same reported splits and metrics}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+For $t\ge2$, the treatment prediction is mapped to the same absolute-choice outcome as the baseline:
+\begin{equation}
+q_t=P_T(z_t=1),\qquad
+P_T(y_t=1)=\begin{cases}q_t,&y_{t-1}=0,\\1-q_t,&y_{t-1}=1.\end{cases}\label{eq:map}
+\end{equation}
+The mapping is defined only for $t\ge2$. The synthetic fixture does not specify a first-trial convention or establish the exact aggregation range; it also contains no independently documented study preregistration.
+
+\section{Observations}
+For metric $m$ and matched seed $s$, define $\Delta m_s=m_{T,s}-m_{B,s}$; each reported mean is taken over the same eight seeds.
+\begin{center}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrr@{}}
+\toprule
+Metric & Baseline mean & Treatment mean & Mean $\Delta$\\
+\midrule
+NLL (nats/trial; lower is better) & 0.55175 & 0.55075 & $-0.00100$\\
+Accuracy (\%; higher is better) & 75.8875 & 75.9500 & $+0.0625$ pp\\
+\bottomrule
+\end{tabular*}
+\end{center}
+\begin{figure}[h!]
+\centering\includegraphics[width=.88\linewidth]{../figures/B_pair_deltas.pdf}
+\caption{Matched-seed differences in NLL ($T-B$). Points are individual seeds; the horizontal rule marks $\Delta=0$. All observations are synthetic.}
+\end{figure}
+
+\noindent\fsrnote{\textbf{Status.} Descriptive differences only; no registered hypothesis, significance test, or population-level uncertainty estimate. The fixture's illustrative threshold is not treated as preregistration.}
+
+\fsrsource{\textbf{Source.} Synthetic data: \texttt{data/B\_seed\_results.csv}; design: \texttt{data/B\_design\_results.json}. The original evaluation window is not independently verified.}
+\end{document}

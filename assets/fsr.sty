@@ -1,0 +1,23 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{fsr}[2026/11/08 FSR offline academic typography]
+\RequirePackage[letterpaper,top=.84in,bottom=.84in,left=1.07in,right=1.07in]{geometry}
+\RequirePackage{amsmath,amssymb,booktabs,tabularx,array,graphicx,caption,microtype,xcolor}
+\RequirePackage{url}
+\urlstyle{rm}
+\Urlmuskip=0mu plus 1mu
+\linespread{1.12}\selectfont
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt plus 1pt minus 1pt}
+\setlength{\abovedisplayskip}{8pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{8pt plus 2pt minus 2pt}
+\setlength{\jot}{3pt}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\tabcolsep}{5.4pt}
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0pt}{-2.0ex plus -.8ex minus -.2ex}{.8ex plus .2ex}{\normalfont\normalsize\bfseries}}
+\makeatother
+\captionsetup{font=small,labelfont=bf,labelsep=period,justification=raggedright,singlelinecheck=false,skip=4pt}
+\pagestyle{plain}
+\newcommand{\fsrtitle}[2]{\begin{center}{\large\bfseries #1\par}\vspace{4pt}{\small #2\par}\end{center}\vspace{1pt}}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}

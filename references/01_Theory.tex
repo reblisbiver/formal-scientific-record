@@ -1,0 +1,65 @@
+\documentclass[11pt]{article}
+\usepackage{../fsr}
+\begin{document}
+\fsrtitle{Prediction and Intervention under Fixed Reward Schedules}{Formal record of the definitions and methods in Zhu (2026)}
+
+\section{Task and generative process}
+A participant chooses from $\mathcal A=\{1,2\}$ over $T=100$ trials. Option $1$ is the target, concealed from the participant; its color and position are counterbalanced. A schedule $S=(s_{t,a})$ is fixed before the task and does not depend on the participant's actions:
+\begin{equation}
+S\in\mathcal S=\left\{S\in\{0,1\}^{100\times2}:\sum_{t=1}^{100}s_{t,a}=25\ \ (a=1,2)\right\}.
+\label{eq:feasible}
+\end{equation}
+With partial feedback, the participant observes only the reward on the selected option. Define
+\begin{align}
+H_{t-1}&=(A_1,R_1,\ldots,A_{t-1},R_{t-1}), & R_t&=s_{t,A_t},\label{eq:hist}\\
+A_t&\sim\pi_\theta(\cdot\mid H_{t-1}),&
+ p_\theta(A_{1:T},R_{1:T}\mid S)&=\prod_{t=1}^{T}\pi_\theta(A_t\mid H_{t-1})\,\mathbf1\{R_t=s_{t,A_t}\}.\label{eq:gen}
+\end{align}
+Here $\theta$ indexes a participant's choice policy; $\pi_\theta$ is unknown to the engineer.
+
+\section{Two distinct objectives}
+The participant maximizes expected received reward, whereas the engineer maximizes the expected proportion of target choices:
+\begin{align}
+U_{\mathrm{participant}}&=\mathbb E_{\pi}\!\left[\sum_{t=1}^{T}R_t\right],\label{eq:part}\\
+B(A_{1:T})&=\frac1T\sum_{t=1}^{T}\mathbf1\{A_t=1\},\label{eq:bias}\\
+J_{\mathrm{engineer}}(S)&=\mathbb E_{\theta\sim p(\theta)}\,\mathbb E_{A_{1:T}\sim\pi_\theta(\cdot\mid S)}[B(A_{1:T})],\qquad S^*=\arg\max_{S\in\mathcal S}J_{\mathrm{engineer}}(S).\label{eq:obj}
+\end{align}
+The constrained search space has cardinality $|\mathcal S|=\binom{100}{25}^{2}\approx 6\times10^{46}$.
+
+\clearpage
+\section{Predicting choices}
+An RNN summarizes observed history in $h_{it}$ and predicts whether participant $i$ chooses the target on trial $t$:
+\begin{align}
+p_{it}&=P_\phi(A_{it}=1\mid H_{i,t-1}),\qquad
+h_{i,t+1}=\operatorname{LSTM}_\phi(h_{it},x_{it}),\label{eq:rnn}\\
+x_{it}&=[R_{it},t/T,e(A_{it})].\label{eq:features}
+\end{align}
+The Note also specifies an optional augmented representation $[x_{it},e(A_{it})R_{it},\mathbf1\{A_{it}=A_{i,t-1}\}]$. Under teacher forcing, recurrent states use the participant's observed previous choices and rewards. With $Y_{it}=\mathbf1\{A_{it}=1\}$,
+\begin{equation}
+\mathcal L(\phi)=-\sum_{i=1}^{N}\sum_{t=1}^{T}\{Y_{it}\log p_{it}+(1-Y_{it})\log(1-p_{it})\}.\label{eq:nll}
+\end{equation}
+\section{Validation and schedule transfer}
+The Note specifies teacher-forced NLL, Brier score and calibration; free-running comparisons of target-choice fraction, rewards, win--stay/lose--switch, streaks and trial-wise curves; and leave-one-schedule-out simulation. To assign equal weight to each of $M$ observed schedules $S^{(m)}$, instead of each participant, it defines
+\begin{equation}
+\mathcal L_{\mathrm{bal}}(\phi)=-\frac1M\sum_{m=1}^{M}\frac{1}{n_m T}\sum_{i:S_i=S^{(m)}}\sum_{t=1}^{T}\log p_\phi(A_{it}\mid H_{i,t-1}),
+\label{eq:balanced}
+\end{equation}
+where $n_m$ is the number of participants assigned schedule $m$.
+
+\section{Intervention models}
+For a fixed schedule, simulate $n$ trajectories under the fitted policy and optimize its estimated target-choice fraction:
+\begin{equation}
+\widehat J(S;\phi)=\frac{1}{nT}\sum_{i=1}^{n}\sum_{t=1}^{T}\mathbf1\{A_{it}=1\},\qquad S^*_{\phi}=\arg\max_{S\in\mathcal S}\widehat J(S;\phi).\label{eq:fixed}
+\end{equation}
+For online allocation, let $b_{t,a}$ be the remaining reward budget for option $a$. The controller state and feasible action are
+\begin{equation}
+\epsilon_t=(h_t,b_{t,1},b_{t,2},t),\qquad U_t=(s_{t,1},s_{t,2})\in\{0,1\}^{2},\qquad b_{t+1,a}=b_{t,a}-s_{t,a}.\label{eq:controller}
+\end{equation}
+At trial $t$, a model-predictive controller can compare feasible allocations using
+\begin{equation}
+Q(u,\epsilon_t)=\mathbb E_{\pi_\phi}\!\left[\sum_{\tau=t}^{T}\mathbf1\{A_\tau=1\}\mid\epsilon_t,U_t=u\right],\qquad U_t^*=\arg\max_{u}Q(u,\epsilon_t).\label{eq:q}
+\end{equation}
+The reward allocation cannot affect the already-made choice $A_t$: its effect is mediated by $R_t$ and the subsequent state $h_{t+1}$.
+
+\fsrsource{\textbf{Source and status.} Jian-Qiao Zhu, \textit{Turning Prediction Models into Intervention Models}, 27 August 2026, pp.~1--6. Equations summarize the Note's stated definitions and methods. No empirical outcomes are reported in that document; none are supplied here.}
+\end{document}
